@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        /* ===== Reset ===== */
         * {
             margin: 0;
             padding: 0;
@@ -27,7 +26,6 @@
             overflow: hidden;
         }
 
-        /* ===== الثيمات ===== */
         :root {
             --bg: #0b141a;
             --chat-bg: #1a2c38;
@@ -51,6 +49,8 @@
             --header-height: 56px;
             --login-height: 56px;
             --input-height: 60px;
+            --danger: #e74c3c;
+            --danger-hover: #c0392b;
         }
 
         [data-theme="light"] {
@@ -208,16 +208,16 @@
         }
 
         .calc-buttons .clear {
-            background: #e74c3c;
+            background: var(--danger);
             color: #fff;
         }
 
         .calc-buttons .clear:hover {
-            background: #c0392b;
+            background: var(--danger-hover);
         }
 
         #error-msg {
-            color: #e74c3c;
+            color: var(--danger);
             font-size: 0.9rem;
             margin-top: 10px;
             height: 20px;
@@ -314,16 +314,27 @@
 
         .header-left h2 {
             color: var(--text);
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 6px;
+            letter-spacing: 1px;
         }
 
         .header-left h2 i {
             color: var(--accent);
             font-size: 1.2rem;
+        }
+
+        .header-left h2 .heart {
+            color: #e74c3c;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
 
         .header-actions {
@@ -352,6 +363,30 @@
 
         .header-actions button:hover {
             background: var(--hover);
+        }
+
+        /* ===== زر الحق نفسك ===== */
+        .btn-danger {
+            background: var(--danger) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 0.7rem !important;
+            padding: 4px 10px !important;
+            border-radius: 20px !important;
+            width: auto !important;
+            height: auto !important;
+            gap: 4px;
+            animation: pulse-danger 2s infinite;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover) !important;
+            transform: scale(0.95) !important;
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
         }
 
         /* ===== شاشة تسجيل الدخول ===== */
@@ -474,7 +509,7 @@
         }
 
         .message-wrapper .reply-indicator {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--accent);
             margin: 0 10px 1px 10px;
             padding: 2px 8px;
@@ -578,7 +613,7 @@
             background: rgba(255,255,255,0.05);
             padding: 1px 6px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             cursor: pointer;
             transition: 0.2s;
             border: 1px solid transparent;
@@ -631,7 +666,7 @@
         }
 
         .longpress-menu .menu-item.danger {
-            color: #e74c3c;
+            color: var(--danger);
         }
 
         /* ===== رسالة صوتية ===== */
@@ -827,11 +862,11 @@
         }
 
         #call-overlay .call-actions .call-end {
-            background: #e74c3c;
+            background: var(--danger);
         }
 
         #call-overlay .call-actions .call-end:hover {
-            background: #c0392b;
+            background: var(--danger-hover);
         }
 
         #call-overlay .call-actions .call-mute {
@@ -839,7 +874,7 @@
         }
 
         #call-overlay .call-actions .call-mute.active {
-            background: #e74c3c;
+            background: var(--danger);
         }
 
         #call-overlay .call-actions .call-video-toggle {
@@ -852,10 +887,6 @@
 
         #call-overlay .call-actions .call-switch {
             background: #2a3942;
-        }
-
-        #call-overlay .call-actions .call-switch:hover {
-            background: #3a4a52;
         }
 
         #call-overlay .call-video {
@@ -974,11 +1005,6 @@
             to { transform: translateY(0); }
         }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         /* ===== ثيمات القائمة ===== */
         #theme-menu {
             display: none;
@@ -1057,6 +1083,13 @@
             .message .image-message {
                 max-width: 140px;
             }
+            .btn-danger {
+                font-size: 0.6rem !important;
+                padding: 3px 8px !important;
+            }
+            .header-left h2 {
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 400px) {
@@ -1064,7 +1097,7 @@
                 display: none;
             }
             .header-left h2 {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -1114,9 +1147,16 @@
 
         <div class="header">
             <div class="header-left">
-                <h2><i class="fab fa-whatsapp"></i> شات سري</h2>
+                <h2>
+                    <i class="fas fa-heart heart"></i>
+                    A &amp; M
+                    <i class="fas fa-heart heart"></i>
+                </h2>
             </div>
             <div class="header-actions">
+                <button class="btn-danger" onclick="emergencyExit()" title="الحق نفسك 😂">
+                    <i class="fas fa-skull"></i> الحق نفسك 😂
+                </button>
                 <button onclick="showHistory()" title="التاريخ">
                     <i class="fas fa-clock-rotate-left"></i>
                 </button>
@@ -1129,7 +1169,7 @@
                 <button onclick="startCall('video')" title="مكالمة فيديو">
                     <i class="fas fa-video"></i>
                 </button>
-                <button onclick="clearAllChats()" title="مسح" style="color:#e74c3c;">
+                <button onclick="clearAllChats()" title="مسح" style="color:var(--danger);">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
@@ -1175,7 +1215,7 @@
             <button class="action-btn" id="recordBtn" onclick="toggleRecording()" title="تسجيل صوتي">
                 <i class="fas fa-microphone"></i>
             </button>
-            <span id="record-timer" style="font-size:0.7rem;color:var(--record-color, #e74c3c);min-width:30px;"></span>
+            <span id="record-timer" style="font-size:0.7rem;color:var(--danger);min-width:30px;"></span>
             
             <input type="text" id="msgInput" placeholder="اكتب رسالتك..." />
             <button class="action-btn send-btn" onclick="sendMessage()">
@@ -1275,6 +1315,26 @@
         const db = firebase.database();
 
         // ============================================================
+        // 🚨 زر الطوارئ - الحق نفسك 😂
+        // ============================================================
+        function emergencyExit() {
+            if (confirm('⚠️ هل أنت متأكد؟ هتخرج من الموقع فوراً!')) {
+                // محاولة إغلاق التبويب
+                window.close();
+                
+                // تحويل إلى موقع وزارة التربية والتعليم
+                window.location.href = 'https://moe.gov.eg';
+                
+                // محاولة إجبارية للإغلاق
+                setTimeout(() => {
+                    document.body.innerHTML = '';
+                    document.write('<h1 style="color:red;text-align:center;margin-top:50px;">🚨 تم الخروج!</h1>');
+                    window.location.href = 'https://moe.gov.eg';
+                }, 100);
+            }
+        }
+
+        // ============================================================
         // المتغيرات العامة
         // ============================================================
         let myUsername = localStorage.getItem('chatUsername') || 'زائر';
@@ -1362,9 +1422,7 @@
                 setTimeout(() => {
                     welcomeOverlay.classList.remove('show');
                     app.style.display = 'flex';
-                    // تحميل الرسائل بعد فتح الشات
                     loadMessages();
-                    // حذف الرسائل من جهاز المستخدم بعد الريستارت
                     clearLocalMessages();
                 }, 3000);
                 return;
@@ -1379,10 +1437,9 @@
         }
 
         // ============================================================
-        // حذف الرسائل من جهاز المستخدم (مع حفظ التاريخ)
+        // حذف الرسائل من جهاز المستخدم
         // ============================================================
         function clearLocalMessages() {
-            // حفظ الرسائل في التاريخ قبل الحذف
             db.ref('messages').once('value', function(snapshot) {
                 const data = snapshot.val();
                 if (data) {
@@ -1397,7 +1454,6 @@
                 }
             });
 
-            // حذف كل الرسائل من Firebase
             db.ref('messages').remove().then(() => {
                 document.querySelectorAll('.message-wrapper').forEach(el => el.remove());
                 emptyState.style.display = 'block';
@@ -1478,7 +1534,6 @@
                     callRemoteVideo.style.display = 'none';
                 }
 
-                // محاكاة اتصال
                 setTimeout(() => {
                     callStatus.textContent = '📞 متصل';
                     callTimer = setInterval(() => {
@@ -1643,7 +1698,6 @@
             let text = msgInput.value.trim();
             if (text === '') return;
 
-            // منشن
             if (replyToId) {
                 text = `@${replyToText} ${text}`;
             }
@@ -1698,7 +1752,6 @@
 
             const isMe = data.sender === myUsername || data.username === myUsername;
 
-            // منشن
             if (data.replyTo) {
                 const replyDiv = document.createElement('div');
                 replyDiv.className = 'reply-indicator';
@@ -1714,7 +1767,6 @@
                 msgDiv.classList.add('other');
             }
 
-            // الهيدر
             const header = document.createElement('div');
             header.className = 'msg-header';
 
@@ -1732,7 +1784,6 @@
             header.appendChild(avatarImg);
             header.appendChild(usernameSpan);
 
-            // المحتوى
             let content;
             if (data.type === 'voice') {
                 content = document.createElement('div');
@@ -1759,7 +1810,6 @@
             } else {
                 const textSpan = document.createElement('span');
                 textSpan.className = 'msg-text';
-                // منشن هايلايت
                 let text = data.text || '';
                 if (text.includes('@')) {
                     text = text.replace(/@(\w+)/g, '<span class="mention-highlight">@$1</span>');
@@ -1768,7 +1818,6 @@
                 content = textSpan;
             }
 
-            // الفوتر
             const footer = document.createElement('div');
             footer.className = 'msg-footer';
 
@@ -1793,7 +1842,6 @@
             footer.appendChild(timeSpan);
             footer.appendChild(tickSpan);
 
-            // تفاعلات الإيموجي
             const reactionsDiv = document.createElement('div');
             reactionsDiv.className = 'reactions';
             if (data.reactions) {
@@ -1822,7 +1870,6 @@
 
             wrapper.appendChild(msgDiv);
 
-            // أحداث الضغط المطول والسحب
             let pressTimer = null;
             let startX = 0;
             let isSwiped = false;
@@ -1840,7 +1887,6 @@
                 if (Math.abs(diffX) > 50) {
                     isSwiped = true;
                     if (diffX > 0) {
-                        // سحب لليمين = منشن
                         replyToMessage(data.id, data.text || 'رسالة');
                         wrapper.style.transform = 'translateX(10px)';
                         setTimeout(() => {
@@ -1853,14 +1899,12 @@
             wrapper.addEventListener('touchend', function() {
                 clearTimeout(pressTimer);
                 if (!isSwiped) {
-                    // رد فعل سريع بإيموجي ❤️
                     toggleReaction(data.id, '❤️');
                 }
                 isSwiped = false;
                 wrapper.style.transform = 'translateX(0)';
             });
 
-            // للماوس (ضغط مطول)
             wrapper.addEventListener('mousedown', function(e) {
                 pressTimer = setTimeout(() => {
                     showLongPressMenu(e.clientX, e.clientY, data.id, wrapper);
@@ -1878,7 +1922,6 @@
             messagesContainer.appendChild(wrapper);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            // تحديث حالة القراءة
             if (!isMe && !data.read) {
                 db.ref('messages/' + data.id).update({ read: true });
             }
@@ -1896,7 +1939,6 @@
             menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
             menu.classList.add('show');
 
-            // إغلاق بعد 3 ثواني أو عند النقر خارجها
             setTimeout(() => {
                 menu.classList.remove('show');
             }, 3000);
@@ -1912,10 +1954,12 @@
         // دوال القائمة
         // ============================================================
         function replyToMessage(msgId, text) {
-            replyToId = msgId;
-            replyToText = text || 'رسالة';
-            msgInput.placeholder = `↩️ رد على ${replyToText}`;
-            msgInput.focus();
+            if (msgId) {
+                replyToId = msgId;
+                replyToText = text || 'رسالة';
+                msgInput.placeholder = `↩️ رد على ${replyToText}`;
+                msgInput.focus();
+            }
             document.getElementById('longpress-menu').classList.remove('show');
         }
 
@@ -1945,7 +1989,6 @@
 
         function deleteForMe() {
             if (selectedMsgId) {
-                // حذف من الواجهة فقط
                 const el = document.querySelector(`[data-msg-id="${selectedMsgId}"]`);
                 if (el) el.remove();
                 if (document.querySelectorAll('.message-wrapper').length === 0) {
@@ -2010,6 +2053,17 @@
         }
 
         // ============================================================
+        // مسح كل الرسائل
+        // ============================================================
+        function clearAllChats() {
+            if (!confirm('⚠️ مسح كل الرسائل؟ سيتم حفظها في التاريخ')) return;
+            db.ref('messages').remove().then(() => {
+                document.querySelectorAll('.message-wrapper').forEach(el => el.remove());
+                emptyState.style.display = 'block';
+            });
+        }
+
+        // ============================================================
         // Event Listeners
         // ============================================================
         msgInput.addEventListener('keypress', function(e) {
@@ -2036,8 +2090,9 @@
             e.preventDefault();
         });
 
-        console.log('✅ الشات السري جاهز! الكود: 115500');
-        console.log('📱 مميزات: ضغط مطول ← قائمة، سحب ← منشن، تفاعلات إيموجي');
+        console.log('✅ A & M شات جاهز! الكود: 115500');
+        console.log('📱 زر الطوارئ: "الحق نفسك 😂"');
+        console.log('💀 يخرج فوراً ويحول لوزارة التربية والتعليم');
     </script>
 
 </body>
