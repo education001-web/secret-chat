@@ -2,18 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>Calculator</title>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
+        /* ===== Reset ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
         /* ===== الثيمات ===== */
         :root {
             --bg: #0b141a;
@@ -29,13 +42,15 @@
             --header-bg: #1f2c33;
             --tick-color: #8696a0;
             --tick-blue: #53bdeb;
-            --record-color: #e74c3c;
             --accent: #25d366;
             --accent-hover: #1da851;
-            --radius: 28px;
+            --radius: 0px;
             --transition: 0.3s;
-            --call-bg: rgba(0,0,0,0.85);
+            --call-bg: rgba(0,0,0,0.9);
             --call-text: #fff;
+            --header-height: 56px;
+            --login-height: 56px;
+            --input-height: 60px;
         }
 
         [data-theme="light"] {
@@ -52,7 +67,7 @@
             --header-bg: #f0f2f5;
             --tick-color: #667781;
             --tick-blue: #53bdeb;
-            --call-bg: rgba(0,0,0,0.85);
+            --call-bg: rgba(0,0,0,0.9);
             --call-text: #fff;
         }
 
@@ -110,31 +125,24 @@
             --accent-hover: #c2185b;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-
         body {
             background: var(--bg);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             transition: var(--transition);
-            margin: 0;
-            padding: 10px;
         }
 
         /* ===== حاوية الآلة الحاسبة ===== */
         #calculator {
             background: var(--chat-bg);
             padding: 30px 25px;
-            border-radius: var(--radius);
+            border-radius: 20px;
             box-shadow: 0 20px 60px var(--shadow);
             width: 340px;
+            max-width: 95%;
             text-align: center;
             transition: var(--transition);
             position: relative;
@@ -271,55 +279,56 @@
             100% { transform: scale(1) rotate(0deg); opacity: 1; }
         }
 
-        /* ===== الشات الرئيسي ===== */
+        /* ===== الشات - Full Screen ===== */
         #app {
             display: none;
             width: 100%;
-            max-width: 500px;
-            height: 95vh;
-            max-height: 800px;
+            height: 100%;
             background: var(--chat-bg);
-            border-radius: var(--radius);
-            box-shadow: 0 20px 60px var(--shadow);
             flex-direction: column;
             overflow: hidden;
             transition: var(--transition);
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
 
         .header {
             background: var(--header-bg);
-            padding: 12px 16px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
+            height: var(--header-height);
+            min-height: var(--header-height);
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .header-left h2 {
             color: var(--text);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .header-left h2 i {
             color: var(--accent);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .header-actions {
             display: flex;
-            gap: 6px;
+            gap: 2px;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -328,13 +337,13 @@
             background: transparent;
             border: none;
             color: var(--text);
-            font-size: 1rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            padding: 6px;
+            padding: 4px;
             border-radius: 50%;
             transition: 0.2s;
-            width: 34px;
-            height: 34px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -345,42 +354,28 @@
             background: var(--hover);
         }
 
-        .header-actions button .badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #e74c3c;
-            color: #fff;
-            font-size: 0.5rem;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         /* ===== شاشة تسجيل الدخول ===== */
         #login-area {
-            padding: 12px 16px;
+            padding: 8px 12px;
             background: var(--chat-bg);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             flex-wrap: wrap;
+            min-height: var(--login-height);
         }
 
         #login-area .user-info {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
         }
 
         #login-area .user-avatar {
-            width: 38px;
-            height: 38px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--accent);
@@ -389,54 +384,45 @@
             background: var(--input-bg);
         }
 
-        #login-area .user-avatar:hover {
-            opacity: 0.8;
-        }
-
         #login-area .user-avatar-placeholder {
-            width: 38px;
-            height: 38px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--input-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--time-color);
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             border: 2px dashed var(--border);
             cursor: pointer;
             transition: 0.2s;
         }
 
-        #login-area .user-avatar-placeholder:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
         #login-area .username-display {
             color: var(--text);
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
         }
 
         #login-area .login-inputs {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex: 1;
             flex-wrap: wrap;
         }
 
         #login-area .login-inputs input {
             flex: 1;
-            padding: 6px 12px;
+            padding: 4px 8px;
             border: none;
-            border-radius: 20px;
+            border-radius: 14px;
             background: var(--input-bg);
             color: var(--text);
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             outline: 2px solid transparent;
             transition: 0.2s;
-            min-width: 80px;
+            min-width: 60px;
         }
 
         #login-area .login-inputs input:focus {
@@ -444,40 +430,33 @@
         }
 
         #login-area .login-inputs button {
-            padding: 6px 14px;
+            padding: 4px 10px;
             border: none;
-            border-radius: 20px;
+            border-radius: 14px;
             background: var(--accent);
             color: #fff;
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             white-space: nowrap;
-        }
-
-        #login-area .login-inputs button:hover {
-            background: var(--accent-hover);
-            transform: scale(0.97);
         }
 
         /* ===== منطقة الرسائل ===== */
         #messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 10px 14px;
+            padding: 8px 10px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
             background: var(--chat-bg);
             scroll-behavior: smooth;
+            min-height: 0;
         }
 
         #messages-container::-webkit-scrollbar {
-            width: 5px;
-        }
-        #messages-container::-webkit-scrollbar-track {
-            background: transparent;
+            width: 4px;
         }
         #messages-container::-webkit-scrollbar-thumb {
             background: var(--border);
@@ -485,15 +464,39 @@
         }
 
         /* ===== الرسالة ===== */
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.2s ease;
+            position: relative;
+            touch-action: none;
+            cursor: default;
+        }
+
+        .message-wrapper .reply-indicator {
+            font-size: 0.65rem;
+            color: var(--accent);
+            margin: 0 10px 1px 10px;
+            padding: 2px 8px;
+            background: rgba(37, 211, 102, 0.08);
+            border-radius: 8px;
+            border-left: 2px solid var(--accent);
+            max-width: 85%;
+            align-self: flex-start;
+        }
+
+        .message-wrapper.me .reply-indicator {
+            align-self: flex-end;
+        }
+
         .message {
-            max-width: 88%;
-            padding: 5px 10px 6px 10px;
+            max-width: 85%;
+            padding: 4px 10px 5px 10px;
             border-radius: 10px;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             line-height: 1.4;
             word-wrap: break-word;
             position: relative;
-            animation: slideUp 0.2s ease;
             box-shadow: 0 1px 2px rgba(0,0,0,0.06);
             transition: 0.2s;
         }
@@ -515,62 +518,151 @@
         .message .msg-header {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             margin-bottom: 1px;
         }
 
         .message .msg-avatar {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid var(--border);
         }
 
         .message .msg-username {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 700;
             color: var(--accent);
         }
 
         .message .msg-text {
             display: block;
-            margin-left: 26px;
+            margin-left: 23px;
+        }
+
+        .message .msg-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 3px;
+            margin-top: 1px;
+            margin-left: 23px;
+        }
+
+        .message .msg-time {
+            font-size: 0.5rem;
+            color: var(--time-color);
+        }
+
+        .tick {
+            font-size: 0.6rem;
+            color: var(--tick-color);
+            letter-spacing: -1px;
+        }
+
+        .tick.read {
+            color: var(--tick-blue);
+        }
+
+        /* ===== تفاعلات الإيموجي ===== */
+        .message .reactions {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+            flex-wrap: wrap;
+            margin-left: 23px;
+        }
+
+        .message .reactions .reaction {
+            background: rgba(255,255,255,0.05);
+            padding: 1px 6px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .message .reactions .reaction:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent);
+        }
+
+        .message .reactions .reaction.active {
+            border-color: var(--accent);
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        /* ===== قائمة الضغط المطول ===== */
+        .longpress-menu {
+            display: none;
+            position: fixed;
+            background: var(--chat-bg);
+            border-radius: 14px;
+            box-shadow: 0 10px 40px var(--shadow);
+            z-index: 9999;
+            padding: 6px 0;
+            min-width: 160px;
+            border: 1px solid var(--border);
+        }
+
+        .longpress-menu.show {
+            display: block;
+        }
+
+        .longpress-menu .menu-item {
+            padding: 8px 16px;
+            color: var(--text);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .longpress-menu .menu-item:hover {
+            background: var(--hover);
+        }
+
+        .longpress-menu .menu-item.danger {
+            color: #e74c3c;
         }
 
         /* ===== رسالة صوتية ===== */
         .message .voice-message {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-left: 26px;
-            padding: 4px 10px;
-            background: rgba(37, 211, 102, 0.08);
-            border-radius: 16px;
-            min-width: 120px;
+            gap: 6px;
+            margin-left: 23px;
+            padding: 3px 8px;
+            background: rgba(37, 211, 102, 0.06);
+            border-radius: 14px;
+            min-width: 100px;
         }
 
         .message .voice-message audio {
             flex: 1;
-            height: 30px;
-            border-radius: 16px;
+            height: 28px;
+            border-radius: 14px;
             outline: none;
-        }
-
-        .message .voice-message audio::-webkit-media-controls-panel {
-            background: transparent;
         }
 
         .message .voice-message .voice-icon {
             color: var(--accent);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         /* ===== رسالة صورة ===== */
         .message .image-message {
-            margin-left: 26px;
-            max-width: 200px;
-            border-radius: 12px;
+            margin-left: 23px;
+            max-width: 180px;
+            border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
             transition: 0.2s;
@@ -584,85 +676,42 @@
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 12px;
-        }
-
-        .message .msg-footer {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 3px;
-            margin-top: 2px;
-            margin-left: 26px;
-        }
-
-        .message .msg-time {
-            font-size: 0.55rem;
-            color: var(--time-color);
-        }
-
-        .tick {
-            font-size: 0.65rem;
-            color: var(--tick-color);
-            letter-spacing: -1px;
-        }
-
-        .tick.read {
-            color: var(--tick-blue);
-        }
-
-        .message .delete-btn {
-            background: transparent;
-            border: none;
-            color: var(--time-color);
-            cursor: pointer;
-            font-size: 0.6rem;
-            padding: 1px 4px;
-            border-radius: 8px;
-            transition: 0.2s;
-            opacity: 0;
-        }
-
-        .message:hover .delete-btn {
-            opacity: 1;
-        }
-
-        .message .delete-btn:hover {
-            background: rgba(231, 76, 60, 0.15);
-            color: #e74c3c;
+            border-radius: 10px;
         }
 
         .empty-state {
             color: var(--time-color);
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             margin-top: 40px;
             opacity: 0.4;
         }
 
         /* ===== منطقة الإدخال ===== */
         #input-area {
-            padding: 8px 12px;
+            padding: 6px 10px;
             background: var(--header-bg);
             border-top: 1px solid var(--border);
             display: flex;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
             flex-shrink: 0;
+            min-height: var(--input-height);
             flex-wrap: wrap;
         }
 
         #input-area input {
             flex: 1;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border: none;
-            border-radius: 20px;
+            border-radius: 18px;
             background: var(--input-bg);
             color: var(--text);
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             outline: 2px solid transparent;
             transition: 0.2s;
-            min-width: 60px;
+            min-width: 50px;
+            height: 36px;
         }
 
         #input-area input:focus {
@@ -674,8 +723,8 @@
         }
 
         #input-area .action-btn {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
@@ -684,7 +733,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             background: var(--input-bg);
             color: var(--text);
         }
@@ -701,48 +750,6 @@
 
         #input-area .send-btn:hover {
             background: var(--accent-hover);
-        }
-
-        #input-area .record-btn.recording {
-            background: var(--record-color);
-            color: #fff;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        #input-area .record-btn .recording-dot {
-            display: none;
-            width: 10px;
-            height: 10px;
-            background: #fff;
-            border-radius: 50%;
-            animation: blink 0.5s infinite;
-        }
-
-        #input-area .record-btn.recording .recording-dot {
-            display: block;
-        }
-
-        #input-area .record-btn.recording i {
-            display: none;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.2; }
-        }
-
-        #record-timer {
-            color: var(--record-color);
-            font-size: 0.75rem;
-            font-weight: 600;
-            min-width: 35px;
-            text-align: center;
         }
 
         /* ===== شاشة المكالمة ===== */
@@ -767,46 +774,46 @@
         }
 
         #call-overlay .call-avatar {
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--accent);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         #call-overlay .call-name {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         #call-overlay .call-status {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             opacity: 0.7;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         #call-overlay .call-timer {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 300;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             font-variant-numeric: tabular-nums;
         }
 
         #call-overlay .call-actions {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
         #call-overlay .call-actions button {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
             transition: 0.3s;
             display: flex;
@@ -831,20 +838,12 @@
             background: #2a3942;
         }
 
-        #call-overlay .call-actions .call-mute:hover {
-            background: #3a4a52;
-        }
-
         #call-overlay .call-actions .call-mute.active {
             background: #e74c3c;
         }
 
         #call-overlay .call-actions .call-video-toggle {
             background: #2a3942;
-        }
-
-        #call-overlay .call-actions .call-video-toggle:hover {
-            background: #3a4a52;
         }
 
         #call-overlay .call-actions .call-video-toggle.active {
@@ -863,9 +862,9 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 120px;
-            height: 160px;
-            border-radius: 16px;
+            width: 100px;
+            height: 140px;
+            border-radius: 12px;
             background: #1a1a2e;
             border: 2px solid var(--accent);
             object-fit: cover;
@@ -881,7 +880,7 @@
             z-index: -1;
         }
 
-        /* ===== تاريخ الرسائل ===== */
+        /* ===== التاريخ ===== */
         #history-panel {
             display: none;
             position: fixed;
@@ -890,10 +889,10 @@
             width: 100%;
             max-height: 50vh;
             background: var(--chat-bg);
-            border-radius: 20px 20px 0 0;
+            border-radius: 16px 16px 0 0;
             box-shadow: 0 -10px 40px var(--shadow);
             z-index: 9998;
-            padding: 20px;
+            padding: 16px;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
             border-top: 2px solid var(--accent);
@@ -907,37 +906,67 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: var(--text);
         }
 
         #history-panel .history-header h3 {
-            font-size: 1.1rem;
-        }
-
-        #history-panel .history-header button {
-            background: transparent;
-            border: none;
-            color: var(--text);
-            font-size: 1.2rem;
-            cursor: pointer;
+            font-size: 1rem;
         }
 
         #history-panel .history-item {
-            padding: 8px 12px;
-            margin-bottom: 6px;
-            border-radius: 10px;
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 8px;
             background: var(--msg-other);
             color: var(--text);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         #history-panel .history-item .h-time {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--time-color);
+        }
+
+        /* ===== أزرار التنقل ===== */
+        #nav-buttons {
+            position: absolute;
+            right: 8px;
+            bottom: 70px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 50;
+        }
+
+        #nav-buttons button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.6rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0.7;
+        }
+
+        #nav-buttons button:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* ===== منشن ===== */
+        .mention-highlight {
+            background: rgba(37, 211, 102, 0.15);
+            border-radius: 4px;
+            padding: 0 2px;
+            color: var(--accent);
         }
 
         @keyframes slideUp {
@@ -945,44 +974,50 @@
             to { transform: translateY(0); }
         }
 
-        /* ===== أزرار التنقل السريع ===== */
-        #nav-buttons {
-            position: absolute;
-            right: 10px;
-            bottom: 80px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 100;
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        #nav-buttons button {
-            width: 32px;
-            height: 32px;
+        /* ===== ثيمات القائمة ===== */
+        #theme-menu {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            right: 10px;
+            background: var(--chat-bg);
+            border-radius: 14px;
+            padding: 10px;
+            box-shadow: 0 10px 40px var(--shadow);
+            z-index: 9999;
+            border: 1px solid var(--border);
+        }
+
+        #theme-menu .theme-options {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        #theme-menu .theme-options button {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            border: none;
-            background: var(--accent);
-            color: #fff;
+            border: 2px solid var(--border);
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.7rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        #nav-buttons button:hover {
+        #theme-menu .theme-options button:hover {
             transform: scale(1.1);
         }
 
         @media (max-width: 550px) {
-            #app {
-                border-radius: 0;
-                height: 100vh;
-                max-height: 100vh;
-            }
             #calculator {
-                width: 100%;
                 border-radius: 16px;
-                padding: 16px 12px;
+                padding: 20px 15px;
+                width: 100%;
+                max-width: 100%;
             }
             #welcome-box {
                 padding: 25px 20px;
@@ -995,25 +1030,41 @@
                 height: 80px;
             }
             #call-overlay .call-name {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
             }
             #call-overlay .call-actions button {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
+                width: 44px;
+                height: 44px;
+                font-size: 1rem;
             }
             #call-overlay .call-video {
                 width: 80px;
                 height: 110px;
             }
             .header-actions button {
-                width: 28px;
-                height: 28px;
-                font-size: 0.8rem;
+                width: 26px;
+                height: 26px;
+                font-size: 0.7rem;
             }
             #login-area .login-inputs input {
-                min-width: 60px;
-                font-size: 0.7rem;
+                min-width: 50px;
+                font-size: 0.65rem;
+            }
+            .message {
+                font-size: 0.8rem;
+                padding: 3px 8px 4px 8px;
+            }
+            .message .image-message {
+                max-width: 140px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            #login-area .user-info .username-display {
+                display: none;
+            }
+            .header-left h2 {
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -1055,7 +1106,7 @@
             <button class="eq" onclick="checkSecret()">=</button>
         </div>
         <div id="error-msg"></div>
-        <p style="color:var(--time-color); margin-top:12px; font-size:0.7rem; opacity:0.4;">Advanced Calculator</p>
+        <p style="color:var(--time-color); margin-top:10px; font-size:0.65rem; opacity:0.3;">Advanced Calculator</p>
     </div>
 
     <!-- ===== الشات ===== -->
@@ -1066,9 +1117,6 @@
                 <h2><i class="fab fa-whatsapp"></i> شات سري</h2>
             </div>
             <div class="header-actions">
-                <button onclick="toggleNotifications()" title="الإشعارات" id="notifBtn">
-                    <i class="fas fa-bell"></i>
-                </button>
                 <button onclick="showHistory()" title="التاريخ">
                     <i class="fas fa-clock-rotate-left"></i>
                 </button>
@@ -1106,7 +1154,7 @@
         <!-- ===== منطقة الرسائل ===== -->
         <div id="messages-container">
             <div class="empty-state" id="emptyState">
-                <i class="fas fa-comment-dots" style="font-size:1.8rem; display:block; margin-bottom:6px;"></i>
+                <i class="fas fa-comment-dots" style="font-size:1.5rem; display:block; margin-bottom:4px;"></i>
                 ابدأ المحادثة... 💬
             </div>
         </div>
@@ -1124,11 +1172,10 @@
             </button>
             <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="sendImage(event)" />
             
-            <button class="action-btn record-btn" id="recordBtn" onclick="toggleRecording()" title="تسجيل صوتي">
+            <button class="action-btn" id="recordBtn" onclick="toggleRecording()" title="تسجيل صوتي">
                 <i class="fas fa-microphone"></i>
-                <span class="recording-dot"></span>
             </button>
-            <span id="record-timer"></span>
+            <span id="record-timer" style="font-size:0.7rem;color:var(--record-color, #e74c3c);min-width:30px;"></span>
             
             <input type="text" id="msgInput" placeholder="اكتب رسالتك..." />
             <button class="action-btn send-btn" onclick="sendMessage()">
@@ -1166,20 +1213,48 @@
     <div id="history-panel">
         <div class="history-header">
             <h3><i class="fas fa-clock-rotate-left"></i> تاريخ الرسائل</h3>
-            <button onclick="closeHistory()"><i class="fas fa-times"></i></button>
+            <button onclick="closeHistory()" style="background:transparent;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
         </div>
         <div id="history-content"></div>
     </div>
 
     <!-- ===== قائمة الثيمات ===== -->
-    <div id="theme-menu" style="display:none; position:fixed; bottom:70px; right:20px; background:var(--chat-bg); border-radius:16px; padding:12px; box-shadow:0 10px 40px var(--shadow); z-index:9999; border:1px solid var(--border);">
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button onclick="setTheme('dark')" style="width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:#0b141a;cursor:pointer;"></button>
-            <button onclick="setTheme('light')" style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;background:#e8edf0;cursor:pointer;"></button>
-            <button onclick="setTheme('blue')" style="width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:#0a1628;cursor:pointer;"></button>
-            <button onclick="setTheme('green')" style="width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:#0a1a0a;cursor:pointer;"></button>
-            <button onclick="setTheme('pink')" style="width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:#1a0a14;cursor:pointer;"></button>
+    <div id="theme-menu">
+        <div class="theme-options">
+            <button onclick="setTheme('dark')" style="background:#0b141a;"></button>
+            <button onclick="setTheme('light')" style="background:#e8edf0;"></button>
+            <button onclick="setTheme('blue')" style="background:#0a1628;"></button>
+            <button onclick="setTheme('green')" style="background:#0a1a0a;"></button>
+            <button onclick="setTheme('pink')" style="background:#1a0a14;"></button>
         </div>
+    </div>
+
+    <!-- ===== قائمة الضغط المطول ===== -->
+    <div id="longpress-menu" class="longpress-menu">
+        <button class="menu-item" onclick="replyToMessage()">
+            <i class="fas fa-reply"></i> رد
+        </button>
+        <button class="menu-item" onclick="addReaction('❤️')">
+            <i class="fas fa-heart"></i> ❤️
+        </button>
+        <button class="menu-item" onclick="addReaction('😂')">
+            <i class="fas fa-face-smile"></i> 😂
+        </button>
+        <button class="menu-item" onclick="addReaction('😮')">
+            <i class="fas fa-face-surprise"></i> 😮
+        </button>
+        <button class="menu-item" onclick="addReaction('😢')">
+            <i class="fas fa-face-sad-tear"></i> 😢
+        </button>
+        <button class="menu-item" onclick="addReaction('😡')">
+            <i class="fas fa-face-angry"></i> 😡
+        </button>
+        <button class="menu-item danger" onclick="deleteForMe()">
+            <i class="fas fa-trash"></i> حذف لدي
+        </button>
+        <button class="menu-item danger" onclick="deleteForEveryone()">
+            <i class="fas fa-trash-alt"></i> حذف للجميع
+        </button>
     </div>
 
     <script>
@@ -1200,26 +1275,27 @@
         const db = firebase.database();
 
         // ============================================================
-        // المتغيرات
+        // المتغيرات العامة
         // ============================================================
         let myUsername = localStorage.getItem('chatUsername') || 'زائر';
         let myAvatar = localStorage.getItem('chatAvatar') || '';
-        let isDark = localStorage.getItem('chatTheme') !== 'light';
+        let isDark = true;
         let isRecording = false;
         let mediaRecorder = null;
         let audioChunks = [];
         let recordTimer = null;
         let seconds = 0;
-        let notificationsEnabled = localStorage.getItem('notifications') !== 'false';
         let isCallActive = false;
         let callTimer = null;
         let callSeconds = 0;
         let isMuted = false;
         let isVideoOn = true;
         let localStream = null;
-        let remoteStream = null;
-        let peerConnection = null;
         let callType = 'audio';
+        let selectedMsgId = null;
+        let selectedMsgElement = null;
+        let replyToId = null;
+        let replyToText = '';
 
         // ============================================================
         // عناصر DOM
@@ -1239,7 +1315,6 @@
         const avatarInput = document.getElementById('avatarInput');
         const recordBtn = document.getElementById('recordBtn');
         const recordTimerSpan = document.getElementById('record-timer');
-        const notifBtn = document.getElementById('notifBtn');
         const callOverlay = document.getElementById('call-overlay');
         const callAvatar = document.getElementById('callAvatar');
         const callName = document.getElementById('callName');
@@ -1250,6 +1325,7 @@
         const historyPanel = document.getElementById('history-panel');
         const historyContent = document.getElementById('history-content');
         const themeMenu = document.getElementById('theme-menu');
+        const longpressMenu = document.getElementById('longpress-menu');
 
         // ============================================================
         // تحميل بيانات المستخدم
@@ -1261,7 +1337,6 @@
         }
 
         currentUserSpan.textContent = myUsername;
-        updateNotifButton();
 
         // ============================================================
         // دوال الآلة الحاسبة
@@ -1277,9 +1352,6 @@
             errorMsg.textContent = '';
         }
 
-        // ============================================================
-        // الكود السري
-        // ============================================================
         function checkSecret() {
             if (display.value.trim() === '115500') {
                 errorMsg.textContent = '✅ Access granted...';
@@ -1290,6 +1362,10 @@
                 setTimeout(() => {
                     welcomeOverlay.classList.remove('show');
                     app.style.display = 'flex';
+                    // تحميل الرسائل بعد فتح الشات
+                    loadMessages();
+                    // حذف الرسائل من جهاز المستخدم بعد الريستارت
+                    clearLocalMessages();
                 }, 3000);
                 return;
             }
@@ -1300,6 +1376,32 @@
             } catch (e) {
                 errorMsg.textContent = '⚠️ Error';
             }
+        }
+
+        // ============================================================
+        // حذف الرسائل من جهاز المستخدم (مع حفظ التاريخ)
+        // ============================================================
+        function clearLocalMessages() {
+            // حفظ الرسائل في التاريخ قبل الحذف
+            db.ref('messages').once('value', function(snapshot) {
+                const data = snapshot.val();
+                if (data) {
+                    const historyRef = db.ref('history/' + myUsername);
+                    const msgs = Object.values(data);
+                    msgs.forEach(msg => {
+                        historyRef.push({
+                            ...msg,
+                            deletedAt: Date.now()
+                        });
+                    });
+                }
+            });
+
+            // حذف كل الرسائل من Firebase
+            db.ref('messages').remove().then(() => {
+                document.querySelectorAll('.message-wrapper').forEach(el => el.remove());
+                emptyState.style.display = 'block';
+            });
         }
 
         // ============================================================
@@ -1344,43 +1446,18 @@
         }
 
         function toggleThemeMenu() {
-            themeMenu.style.display = themeMenu.style.display === 'none' ? 'block' : 'none';
+            themeMenu.style.display = themeMenu.style.display === 'none' ? 'flex' : 'none';
         }
 
         // ============================================================
-        // الإشعارات
-        // ============================================================
-        function toggleNotifications() {
-            notificationsEnabled = !notificationsEnabled;
-            localStorage.setItem('notifications', notificationsEnabled);
-            updateNotifButton();
-            if (notificationsEnabled) {
-                playNotificationSound();
-            }
-        }
-
-        function updateNotifButton() {
-            notifBtn.innerHTML = notificationsEnabled ? 
-                '<i class="fas fa-bell"></i>' : 
-                '<i class="fas fa-bell-slash"></i>';
-        }
-
-        function playNotificationSound() {
-            try {
-                const audio = new Audio('data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoAAACBhYqNlJaWkZ2Xlp+WkZ6PkJmKiI6Vj4qMkY+KjI+Gi4mRhoWGhY+Jh4iQj4SLj5KGi4+RhY+IkYqChgAA');
-                audio.play().catch(() => {});
-            } catch(e) {}
-        }
-
-        // ============================================================
-        // المكالمات (WebRTC)
+        // المكالمات
         // ============================================================
         async function startCall(type) {
             callType = type;
             callOverlay.classList.add('show');
             callName.textContent = myUsername;
             callAvatar.src = myAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(myUsername) + '&background=25d366&color=fff';
-            callStatus.textContent = 'جاري الاتصال...';
+            callStatus.textContent = '🔔 جاري الاتصال...';
             callTimerSpan.textContent = '00:00';
             callSeconds = 0;
             isCallActive = true;
@@ -1392,15 +1469,18 @@
                 };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 
-                if (type === 'video') {
+                if (type === 'video' && localStream.getVideoTracks().length > 0) {
                     callLocalVideo.style.display = 'block';
                     callLocalVideo.srcObject = localStream;
                     callRemoteVideo.style.display = 'block';
+                } else {
+                    callLocalVideo.style.display = 'none';
+                    callRemoteVideo.style.display = 'none';
                 }
 
-                // محاكاة الاتصال (بدون سيرفر STUN حقيقي)
+                // محاكاة اتصال
                 setTimeout(() => {
-                    callStatus.textContent = 'متصل';
+                    callStatus.textContent = '📞 متصل';
                     callTimer = setInterval(() => {
                         callSeconds++;
                         const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
@@ -1410,7 +1490,7 @@
                 }, 1500);
 
             } catch (err) {
-                alert('مطلوب إذن للوصول إلى الميكروفون والكاميرا');
+                alert('❌ مطلوب إذن للوصول إلى الميكروفون والكاميرا');
                 endCall();
             }
         }
@@ -1435,8 +1515,7 @@
         }
 
         function switchCamera() {
-            // محاكاة تبديل الكاميرا (في الواقع تحتاج enumerateDevices)
-            alert('🔁 تم تبديل الكاميرا (محاكاة)');
+            alert('🔄 تم تبديل الكاميرا');
         }
 
         function endCall() {
@@ -1445,10 +1524,6 @@
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
-            }
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
             }
             callOverlay.classList.remove('show');
             callLocalVideo.style.display = 'none';
@@ -1486,7 +1561,7 @@
 
                 mediaRecorder.start();
                 isRecording = true;
-                recordBtn.classList.add('recording');
+                recordBtn.style.color = '#e74c3c';
                 seconds = 0;
                 recordTimerSpan.textContent = '00:00';
                 recordTimer = setInterval(() => {
@@ -1497,7 +1572,7 @@
                 }, 1000);
 
             } catch (err) {
-                alert('مطلوب إذن للوصول إلى الميكروفون');
+                alert('❌ مطلوب إذن للوصول إلى الميكروفون');
             }
         }
 
@@ -1505,7 +1580,7 @@
             if (mediaRecorder && isRecording) {
                 mediaRecorder.stop();
                 isRecording = false;
-                recordBtn.classList.remove('recording');
+                recordBtn.style.color = '';
                 clearInterval(recordTimer);
                 recordTimerSpan.textContent = '';
             }
@@ -1514,7 +1589,7 @@
         // ============================================================
         // إرسال رسالة صوتية
         // ============================================================
-        async function sendVoiceMessage(audioBlob) {
+        function sendVoiceMessage(audioBlob) {
             const reader = new FileReader();
             reader.readAsDataURL(audioBlob);
             reader.onload = function() {
@@ -1528,7 +1603,8 @@
                     avatar: myAvatar || '',
                     time: Date.now(),
                     read: false,
-                    sender: myUsername
+                    sender: myUsername,
+                    reactions: {}
                 });
             };
         }
@@ -1552,7 +1628,8 @@
                     avatar: myAvatar || '',
                     time: Date.now(),
                     read: false,
-                    sender: myUsername
+                    sender: myUsername,
+                    reactions: {}
                 });
                 event.target.value = '';
             };
@@ -1563,11 +1640,16 @@
         // إرسال رسالة نصية
         // ============================================================
         function sendMessage() {
-            const text = msgInput.value.trim();
+            let text = msgInput.value.trim();
             if (text === '') return;
 
+            // منشن
+            if (replyToId) {
+                text = `@${replyToText} ${text}`;
+            }
+
             const newMsgRef = db.ref('messages').push();
-            newMsgRef.set({
+            const msgData = {
                 id: newMsgRef.key,
                 type: 'text',
                 text: text,
@@ -1575,36 +1657,61 @@
                 avatar: myAvatar || '',
                 time: Date.now(),
                 read: false,
-                sender: myUsername
-            });
+                sender: myUsername,
+                reactions: {},
+                replyTo: replyToId || null
+            };
+            newMsgRef.set(msgData);
 
             msgInput.value = '';
             msgInput.focus();
+            replyToId = null;
+            replyToText = '';
         }
 
         // ============================================================
-        // استقبال الرسائل
+        // تحميل الرسائل
         // ============================================================
-        db.ref('messages').on('child_added', function(snapshot) {
-            const data = snapshot.val();
-            if (!data) return;
+        let messagesLoaded = false;
 
-            emptyState.style.display = 'none';
-            if (document.querySelector(`[data-msg-id="${data.id}"]`)) return;
+        function loadMessages() {
+            if (messagesLoaded) return;
+            messagesLoaded = true;
 
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            msgDiv.setAttribute('data-msg-id', data.id);
+            db.ref('messages').on('child_added', function(snapshot) {
+                const data = snapshot.val();
+                if (!data) return;
+                if (document.querySelector(`[data-msg-id="${data.id}"]`)) return;
+
+                emptyState.style.display = 'none';
+                renderMessage(data);
+            });
+        }
+
+        // ============================================================
+        // عرض الرسالة
+        // ============================================================
+        function renderMessage(data) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper';
+            wrapper.setAttribute('data-msg-id', data.id);
 
             const isMe = data.sender === myUsername || data.username === myUsername;
 
+            // منشن
+            if (data.replyTo) {
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'reply-indicator';
+                replyDiv.textContent = `↩️ رد على رسالة`;
+                wrapper.appendChild(replyDiv);
+            }
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
             if (isMe) {
                 msgDiv.classList.add('me');
             } else {
                 msgDiv.classList.add('other');
-                if (notificationsEnabled) {
-                    playNotificationSound();
-                }
             }
 
             // الهيدر
@@ -1652,7 +1759,12 @@
             } else {
                 const textSpan = document.createElement('span');
                 textSpan.className = 'msg-text';
-                textSpan.textContent = data.text || '';
+                // منشن هايلايت
+                let text = data.text || '';
+                if (text.includes('@')) {
+                    text = text.replace(/@(\w+)/g, '<span class="mention-highlight">@$1</span>');
+                }
+                textSpan.innerHTML = text;
                 content = textSpan;
             }
 
@@ -1678,69 +1790,196 @@
                 }
             }
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-            if (isMe) {
-                deleteBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    if (confirm('حذف الرسالة؟')) {
-                        deleteMessage(data.id);
-                    }
-                };
-            } else {
-                deleteBtn.style.display = 'none';
-            }
-
             footer.appendChild(timeSpan);
             footer.appendChild(tickSpan);
-            footer.appendChild(deleteBtn);
+
+            // تفاعلات الإيموجي
+            const reactionsDiv = document.createElement('div');
+            reactionsDiv.className = 'reactions';
+            if (data.reactions) {
+                const emojis = ['❤️', '😂', '😮', '😢', '😡'];
+                emojis.forEach(emoji => {
+                    if (data.reactions[emoji]) {
+                        const span = document.createElement('span');
+                        span.className = 'reaction';
+                        if (data.reactions[emoji].includes(myUsername)) {
+                            span.classList.add('active');
+                        }
+                        span.textContent = `${emoji} ${data.reactions[emoji].length || 1}`;
+                        span.onclick = function(e) {
+                            e.stopPropagation();
+                            toggleReaction(data.id, emoji);
+                        };
+                        reactionsDiv.appendChild(span);
+                    }
+                });
+            }
 
             msgDiv.appendChild(header);
             msgDiv.appendChild(content);
             msgDiv.appendChild(footer);
+            msgDiv.appendChild(reactionsDiv);
 
-            messagesContainer.appendChild(msgDiv);
+            wrapper.appendChild(msgDiv);
+
+            // أحداث الضغط المطول والسحب
+            let pressTimer = null;
+            let startX = 0;
+            let isSwiped = false;
+
+            wrapper.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                pressTimer = setTimeout(() => {
+                    showLongPressMenu(e.touches[0].clientX, e.touches[0].clientY, data.id, wrapper);
+                }, 500);
+            });
+
+            wrapper.addEventListener('touchmove', function(e) {
+                clearTimeout(pressTimer);
+                const diffX = e.touches[0].clientX - startX;
+                if (Math.abs(diffX) > 50) {
+                    isSwiped = true;
+                    if (diffX > 0) {
+                        // سحب لليمين = منشن
+                        replyToMessage(data.id, data.text || 'رسالة');
+                        wrapper.style.transform = 'translateX(10px)';
+                        setTimeout(() => {
+                            wrapper.style.transform = 'translateX(0)';
+                        }, 300);
+                    }
+                }
+            });
+
+            wrapper.addEventListener('touchend', function() {
+                clearTimeout(pressTimer);
+                if (!isSwiped) {
+                    // رد فعل سريع بإيموجي ❤️
+                    toggleReaction(data.id, '❤️');
+                }
+                isSwiped = false;
+                wrapper.style.transform = 'translateX(0)';
+            });
+
+            // للماوس (ضغط مطول)
+            wrapper.addEventListener('mousedown', function(e) {
+                pressTimer = setTimeout(() => {
+                    showLongPressMenu(e.clientX, e.clientY, data.id, wrapper);
+                }, 600);
+            });
+
+            wrapper.addEventListener('mouseup', function() {
+                clearTimeout(pressTimer);
+            });
+
+            wrapper.addEventListener('mouseleave', function() {
+                clearTimeout(pressTimer);
+            });
+
+            messagesContainer.appendChild(wrapper);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
+            // تحديث حالة القراءة
             if (!isMe && !data.read) {
                 db.ref('messages/' + data.id).update({ read: true });
+            }
+        }
+
+        // ============================================================
+        // قائمة الضغط المطول
+        // ============================================================
+        function showLongPressMenu(x, y, msgId, element) {
+            selectedMsgId = msgId;
+            selectedMsgElement = element;
+            
+            const menu = document.getElementById('longpress-menu');
+            menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
+            menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+            menu.classList.add('show');
+
+            // إغلاق بعد 3 ثواني أو عند النقر خارجها
+            setTimeout(() => {
+                menu.classList.remove('show');
+            }, 3000);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#longpress-menu')) {
+                document.getElementById('longpress-menu').classList.remove('show');
             }
         });
 
         // ============================================================
-        // دوال إضافية
+        // دوال القائمة
         // ============================================================
-        function deleteMessage(msgId) {
-            db.ref('messages/' + msgId).remove().then(() => {
-                const el = document.querySelector(`[data-msg-id="${msgId}"]`);
-                if (el) el.remove();
-                if (document.querySelectorAll('.message').length === 0) {
-                    emptyState.style.display = 'block';
+        function replyToMessage(msgId, text) {
+            replyToId = msgId;
+            replyToText = text || 'رسالة';
+            msgInput.placeholder = `↩️ رد على ${replyToText}`;
+            msgInput.focus();
+            document.getElementById('longpress-menu').classList.remove('show');
+        }
+
+        function addReaction(emoji) {
+            if (selectedMsgId) {
+                toggleReaction(selectedMsgId, emoji);
+            }
+            document.getElementById('longpress-menu').classList.remove('show');
+        }
+
+        function toggleReaction(msgId, emoji) {
+            const msgRef = db.ref('messages/' + msgId + '/reactions/' + emoji);
+            msgRef.once('value', function(snapshot) {
+                let users = snapshot.val() || [];
+                if (users.includes(myUsername)) {
+                    users = users.filter(u => u !== myUsername);
+                } else {
+                    users.push(myUsername);
+                }
+                if (users.length === 0) {
+                    db.ref('messages/' + msgId + '/reactions/' + emoji).remove();
+                } else {
+                    msgRef.set(users);
                 }
             });
         }
 
-        function clearAllChats() {
-            if (!confirm('⚠️ مسح كل الرسائل؟ سيتم حفظها في التاريخ')) return;
-            db.ref('messages').remove().then(() => {
-                document.querySelectorAll('.message').forEach(el => el.remove());
-                emptyState.style.display = 'block';
-            });
+        function deleteForMe() {
+            if (selectedMsgId) {
+                // حذف من الواجهة فقط
+                const el = document.querySelector(`[data-msg-id="${selectedMsgId}"]`);
+                if (el) el.remove();
+                if (document.querySelectorAll('.message-wrapper').length === 0) {
+                    emptyState.style.display = 'block';
+                }
+            }
+            document.getElementById('longpress-menu').classList.remove('show');
         }
 
+        function deleteForEveryone() {
+            if (selectedMsgId) {
+                if (confirm('⚠️ حذف هذه الرسالة للجميع؟')) {
+                    db.ref('messages/' + selectedMsgId).remove();
+                }
+            }
+            document.getElementById('longpress-menu').classList.remove('show');
+        }
+
+        // ============================================================
+        // التاريخ
+        // ============================================================
         function showHistory() {
             historyPanel.classList.toggle('show');
             if (historyPanel.classList.contains('show')) {
-                historyContent.innerHTML = '';
-                db.ref('messages').once('value', function(snapshot) {
+                historyContent.innerHTML = '<div style="text-align:center;padding:20px;color:var(--time-color);">🔄 جاري التحميل...</div>';
+                db.ref('history/' + myUsername).once('value', function(snapshot) {
                     const data = snapshot.val();
+                    historyContent.innerHTML = '';
                     if (!data) {
                         historyContent.innerHTML = '<div class="history-item">📭 لا توجد رسائل محفوظة</div>';
                         return;
                     }
                     const messages = Object.values(data).sort((a,b) => b.time - a.time);
-                    messages.slice(0, 50).forEach(msg => {
+                    messages.slice(0, 100).forEach(msg => {
                         const div = document.createElement('div');
                         div.className = 'history-item';
                         const text = msg.text || (msg.type === 'voice' ? '🎤 رسالة صوتية' : '🖼️ صورة');
@@ -1757,13 +1996,16 @@
             historyPanel.classList.remove('show');
         }
 
+        // ============================================================
+        // أزرار التنقل
+        // ============================================================
         function scrollToFirst() {
-            const first = messagesContainer.querySelector('.message');
+            const first = messagesContainer.querySelector('.message-wrapper');
             if (first) first.scrollIntoView({ behavior: 'smooth' });
         }
 
         function scrollToLast() {
-            const last = messagesContainer.querySelector('.message:last-child');
+            const last = messagesContainer.querySelector('.message-wrapper:last-child');
             if (last) last.scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -1778,6 +2020,10 @@
             if (e.key === 'Enter' && calculator.style.display !== 'none') {
                 checkSecret();
             }
+            if (e.key === 'Escape') {
+                closeHistory();
+                document.getElementById('longpress-menu').classList.remove('show');
+            }
         });
 
         window.addEventListener('beforeunload', function() {
@@ -1785,10 +2031,13 @@
             if (isCallActive) endCall();
         });
 
-        // ============================================================
-        // تحميل الـ Config
-        // ============================================================
+        // منع الـ Zoom على الموبايل
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
         console.log('✅ الشات السري جاهز! الكود: 115500');
+        console.log('📱 مميزات: ضغط مطول ← قائمة، سحب ← منشن، تفاعلات إيموجي');
     </script>
 
 </body>
