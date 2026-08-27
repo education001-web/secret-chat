@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>آلة حاسبة سرية</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #1e1e2f; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #calculator { background: #2d2d44; padding: 30px 25px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.7); width: 340px; text-align: center; }
+        #calc-display { width: 100%; height: 80px; background: #1a1a2e; color: #0ff; font-size: 2.8rem; text-align: right; padding: 15px 20px; border: none; border-radius: 20px; outline: none; margin-bottom: 20px; font-weight: bold; box-shadow: inset 0 0 10px #0ff3; }
+        .calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .calc-buttons button { padding: 20px; font-size: 1.6rem; font-weight: bold; border: none; border-radius: 18px; background: #3b3b5c; color: #fff; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 0 #1a1a2e; }
+        .calc-buttons button:hover { background: #50507a; transform: scale(0.96); }
+        .calc-buttons .op { background: #f39c12; color: #1e1e2f; }
+        .calc-buttons .eq { background: #00e676; color: #1e1e2f; grid-column: span 2; }
+        #chat-container { display: none; width: 400px; max-width: 95%; background: #2d2d44; border-radius: 30px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.7); flex-direction: column; align-items: center; animation: fadeIn 0.6s ease; }
+        #chat-container h2 { color: #0ff; margin-bottom: 15px; font-size: 1.8rem; text-shadow: 0 0 15px #0ff6; }
+        #messages { width: 100%; height: 400px; background: #1a1a2e; border-radius: 20px; padding: 15px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #0ff3; }
+        #messages .msg { background: #3b3b5c; color: #fff; padding: 10px 16px; border-radius: 20px; max-width: 80%; word-wrap: break-word; align-self: flex-start; animation: slideUp 0.3s ease; }
+        #messages .msg.me { background: #00e676; color: #1e1e2f; align-self: flex-end; }
+        #input-area { display: flex; width: 100%; gap: 10px; }
+        #input-area input { flex: 1; padding: 14px 18px; border: none; border-radius: 50px; background: #1a1a2e; color: #fff; font-size: 1rem; outline: 2px solid #0ff3; }
+        #input-area input:focus { outline-color: #0ff; }
+        #input-area button { padding: 14px 25px; border: none; border-radius: 50px; background: #00e676; color: #1e1e2f; font-weight: bold; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+        #back-btn { margin-top: 15px; padding: 10px 25px; background: #e74c3c; border: none; border-radius: 50px; color: #fff; font-weight: bold; cursor: pointer; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #error-msg { color: #ff6b6b; font-size: 0.9rem; margin-top: 10px; height: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="calculator">
+    <input type="text" id="calc-display" readonly value="0" />
+    <div class="calc-buttons">
+        <button onclick="appendVal('7')">7</button>
+        <button onclick="appendVal('8')">8</button>
+        <button onclick="appendVal('9')">9</button>
+        <button class="op" onclick="appendVal('+')">+</button>
+        <button onclick="appendVal('4')">4</button>
+        <button onclick="appendVal('5')">5</button>
+        <button onclick="appendVal('6')">6</button>
+        <button class="op" onclick="appendVal('-')">−</button>
+        <button onclick="appendVal('1')">1</button>
+        <button onclick="appendVal('2')">2</button>
+        <button onclick="appendVal('3')">3</button>
+        <button class="op" onclick="appendVal('*')">×</button>
+        <button onclick="clearDisplay()">C</button>
+        <button onclick="appendVal('0')">0</button>
+        <button onclick="appendVal('.')">.</button>
+        <button class="op" onclick="appendVal('/')">÷</button>
+        <button class="eq" onclick="checkSecret()">=</button>
+    </div>
+    <div id="error-msg"></div>
+    <p style="color:#888; margin-top:15px; font-size:0.8rem;">آلة حاسبة ذكية</p>
+</div>
+
+<div id="chat-container">
+    <h2>💬 غرفة سرية</h2>
+    <div id="messages"></div>
+    <div id="input-area">
+        <input type="text" id="msgInput" placeholder="اكتب رسالتك..." />
+        <button onclick="sendMessage()">إرسال</button>
+    </div>
+    <button id="back-btn" onclick="goBack()">🔙 رجوع للآلة</button>
+</div>
+
+<script>
+    // ===== 🔥 حط إعدادات Firebase هنا =====
+    const firebaseConfig = {
+        apiKey: "AIzaSyCJgKUHeQwivdTCxD0m1qbihUs-z1lj4",
+        authDomain: "my-secret-chat-a042c.firebaseapp.com",
+        databaseURL: "https://my-secret-chat-a042c-default-rtdb.firebaseio.com",
+        projectId: "my-secret-chat-a042c",
+        storageBucket: "my-secret-chat-a042c.firebasestorage.app",
+        messagingSenderId: "987084105580",
+        appId: "1:987084105580:web:9ff427f55e1afd1d32f549"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ===== منطق الآلة الحاسبة =====
+    const display = document.getElementById('calc-display');
+    const errorMsg = document.getElementById('error-msg');
+
+    function appendVal(val) {
+        if (display.value === '0') display.value = '';
+        display.value += val;
+        errorMsg.textContent = '';
+    }
+
+    function clearDisplay() {
+        display.value = '0';
+        errorMsg.textContent = '';
+    }
+
+    // ===== الكود السري =====
+    function checkSecret() {
+        if (display.value.trim() === '115500') {
+            errorMsg.textContent = '✅ كود صحيح! جاري فتح الغرفة...';
+            setTimeout(() => {
+                document.getElementById('calculator').style.display = 'none';
+                document.getElementById('chat-container').style.display = 'flex';
+            }, 400);
+            return;
+        }
+        try {
+            const result = Function('"use strict"; return (' + display.value + ')')();
+            display.value = result;
+            errorMsg.textContent = '';
+        } catch (e) {
+            errorMsg.textContent = '⚠️ خطأ في الإدخال';
+        }
+    }
+
+    // ===== دوال الشات =====
+    function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (text === '') return;
+        db.ref('messages').push({ text: text, time: Date.now() });
+        input.value = '';
+    }
+
+    db.ref('messages').on('child_added', function(snapshot) {
+        const data = snapshot.val();
+        const container = document.getElementById('messages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'msg';
+        msgDiv.textContent = data.text;
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+    });
+
+    document.getElementById('msgInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function goBack() {
+        document.getElementById('chat-container').style.display = 'none';
+        document.getElementById('calculator').style.display = 'block';
+        clearDisplay();
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && document.getElementById('calculator').style.display !== 'none') {
+            checkSecret();
+        }
+    });
+</script>
+
+</body>
+</html>
